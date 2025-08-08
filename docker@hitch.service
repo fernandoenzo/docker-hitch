@@ -1,0 +1,23 @@
+[Unit]
+Description=Docker Hitch container
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=0
+
+[Service]
+TimeoutStartSec=infinity
+ExecStartPre=/usr/bin/docker run -d -it --init --rm \
+             -p 443:443 \
+             -v letsEncrypt:/etc/letsencrypt:ro \
+             --name Hitch --hostname Hitch \
+             ghcr.io/fernandoenzo/hitch:latest
+ExecStart=/usr/bin/docker logs -f Hitch
+ExecStop=-/usr/bin/docker stop Hitch
+Restart=always
+RestartSec=1s
+SuccessExitStatus=143
+
+[Install]
+WantedBy=multi-user.target
+
